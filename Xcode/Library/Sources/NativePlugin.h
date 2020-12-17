@@ -55,6 +55,7 @@ void cbService_discoverCharacteristic(CBService* service);
 const char* cbCharacteristic_uuid(CBCharacteristic* characteristic);
 const char* cbCharacteristic_propertyString(CBCharacteristic* characteristic);
 void cbCharacteristic_setNotifyValue(CBCharacteristic* characteristic, bool enable);
+void cbCharacteristic_writeValue(CBCharacteristic* characteristic, NSDate* data)
 
 #ifdef __cplusplus
 }

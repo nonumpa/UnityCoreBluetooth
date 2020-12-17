@@ -160,3 +160,6 @@ void cbCharacteristic_setNotifyValue(CBCharacteristic* characteristic, bool enab
     [characteristic.service.peripheral setNotifyValue: enable forCharacteristic: characteristic];
 }
 
+void cbCharacteristic_writeValue(CBCharacteristic* characteristic, NSDate* data) {
+    [characteristic.service.peripheral writeValue: data forCharacteristic:characteristic type: characteristic.service.peripheral.CBCharacteristicWriteType.CBCharacteristicWriteWithoutResponse];
+}
