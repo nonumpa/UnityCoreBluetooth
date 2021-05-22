@@ -10,9 +10,9 @@
 //#import IMPORT_SWIFT_HEADER
 #import "NativePlugin.h"
 
-int add_one(int num) {
-    return (int)[AddOne addWithNum: num];
-}
+//int add_one(int num) {
+//    return (int)[AddOne addWithNum: num];
+//}
 
 void unityCoreBluetooth_onUpdateState(UnityCoreBluetooth* unityCoreBluetooth, OnUpdateStateHandler handler) {
     @autoreleasepool {
@@ -27,6 +27,7 @@ void unityCoreBluetooth_onDiscoverPeripheral(UnityCoreBluetooth* unityCoreBlueto
     @autoreleasepool {
         if (unityCoreBluetooth == nil) return;
         [unityCoreBluetooth onDiscoverPeripheralWithHandler: ^(CBPeripheral* peripheral) {
+            NSLog(@"peripheral addr: %p", peripheral);
             handler(peripheral);
         }];
     }
@@ -44,8 +45,18 @@ void unityCoreBluetooth_onConnectPeripheral(UnityCoreBluetooth* unityCoreBluetoo
 void unityCoreBluetooth_onDiscoverService(UnityCoreBluetooth* unityCoreBluetooth, OnDiscoverServiceHandler handler) {
     @autoreleasepool {
         if (unityCoreBluetooth == nil) return;
-        [unityCoreBluetooth onDiscoverServiceWithHandler: ^(CBService* service) {
-            handler(service);
+        [unityCoreBluetooth onDiscoverServiceWithHandler: ^(NSArray<CBService*>* services) {
+            id result[ [services count] ];
+            int i = 0;
+            for (id item in services)
+            {
+                result[i++] = item;
+            }
+            handler(&result, [services count]);
+//            NSLog(@"NSArray services addr: %p", services);
+//            NSLog(@"result addr: %p", &result);
+//            NSLog(@"First service addr: %p", [services objectAtIndex:0]);
+//            NSLog(@"First result addr: %p", &result[0]);
         }];
     }
 }
@@ -53,8 +64,14 @@ void unityCoreBluetooth_onDiscoverService(UnityCoreBluetooth* unityCoreBluetooth
 void unityCoreBluetooth_onDiscoverCharacteristic(UnityCoreBluetooth* unityCoreBluetooth, OnDiscoverCharacteristicHandler handler) {
     @autoreleasepool {
         if (unityCoreBluetooth == nil) return;
-        [unityCoreBluetooth onDiscoverCharacteristicWithHandler: ^(CBCharacteristic* characteristic) {
-            handler(characteristic);
+        [unityCoreBluetooth onDiscoverCharacteristicWithHandler: ^(NSArray<CBCharacteristic*>* characteristics) {
+            id result[ [characteristics count] ];
+            int i = 0;
+            for (id item in characteristics)
+            {
+                result[i++] = item;
+            }
+            handler(&result, [characteristics count]);
         }];
     }
 }
@@ -126,7 +143,23 @@ void cbPeripheral_discoverServices(CBPeripheral* peripheral) {
     [peripheral discoverServices: nil];
 }
 
+void cbPeripheral_services(CBPeripheral* peripheral,  void *serviceArrayPtr, long* servicesSize) {
+    NSArray<CBService *> *ss = peripheral.services;
+    if (ss == nil) return;
+    
+    id result[ [ss count] ];
+    int i = 0;
+    for (id item in ss)
+    {
+        result[i++] = item;
+    }
+    
+    serviceArrayPtr = &result;
+    *servicesSize = [ss count];
+}
+
 const char* cbService_uuid(CBService* service) {
+//    NSLog(@"cbService_uuid addr: %p", service);
     NSString* name = service.UUID.UUIDString != nil ? service.UUID.UUIDString: @"";
     const char* str = [name UTF8String];
     char* retStr = (char*)malloc(strlen(str) + 1);
@@ -137,6 +170,24 @@ const char* cbService_uuid(CBService* service) {
 
 void cbService_discoverCharacteristic(CBService* service) {
     [service.peripheral discoverCharacteristics:nil forService:service];
+}
+
+void cbService_characteristics(CBService* service, void* characteristicArrayPtr, long* characteristicsSize) {
+    NSArray<CBCharacteristic*>* cs = service.characteristics;
+    NSLog(@"cbService_characteristics service addr: %p", service);
+    NSLog(@"cbService_characteristics characteristics addr: %p", cs);
+    if (cs == nil) return;
+    NSLog(@"cbService_characteristics count: %ld", [cs count]);
+    id result[ [cs count] ];
+    int i = 0;
+    for (id item in cs)
+    {
+        result[i++] = item;
+    }
+    
+    characteristicArrayPtr = &result;
+    *characteristicsSize = [cs count];
+    
 }
 
 const char* cbCharacteristic_uuid(CBCharacteristic* characteristic) {
@@ -160,6 +211,8 @@ void cbCharacteristic_setNotifyValue(CBCharacteristic* characteristic, bool enab
     [characteristic.service.peripheral setNotifyValue: enable forCharacteristic: characteristic];
 }
 
-void cbCharacteristic_writeValue(CBCharacteristic* characteristic, NSDate* data) {
-    [characteristic.service.peripheral writeValue: data forCharacteristic:characteristic type: characteristic.service.peripheral.CBCharacteristicWriteType.CBCharacteristicWriteWithoutResponse];
+void cbCharacteristic_writeValue(CBCharacteristic* characteristic, int type, unsigned char* chardata, long length) {
+    NSData *data = [NSData dataWithBytes:(const void *)chardata length:length];
+    [characteristic.service.peripheral writeValue: data forCharacteristic:characteristic type: CBCharacteristicWriteType(type)];
+//    free(chardata);
 }

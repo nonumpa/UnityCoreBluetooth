@@ -117,15 +117,15 @@ public class UnityCoreBluetooth: NSObject {
         }
     }
     
-    private var onDiscoverServicelHandler: ((_ service: CBService) -> Void)? = nil
-    public func onDiscoverService(handler: @escaping (_ services: CBService) -> Void) {
+    private var onDiscoverServicelHandler: ((_ service: [CBService]) -> Void)? = nil
+    public func onDiscoverService(handler: @escaping (_ services: [CBService]) -> Void) {
         DispatchQueue.main.async { [weak self] in
             self?.onDiscoverServicelHandler = handler
         }
     }
     
-    private var onDiscoverCharacteristiclHandler: ((_ characteristic: CBCharacteristic) -> Void)? = nil
-    public func onDiscoverCharacteristic(handler: @escaping (_ characteristic: CBCharacteristic) -> Void) {
+    private var onDiscoverCharacteristiclHandler: ((_ characteristic: [CBCharacteristic]) -> Void)? = nil
+    public func onDiscoverCharacteristic(handler: @escaping (_ characteristic: [CBCharacteristic]) -> Void) {
         DispatchQueue.main.async { [weak self] in
             self?.onDiscoverCharacteristiclHandler = handler
         }
@@ -168,6 +168,13 @@ public class UnityCoreBluetooth: NSObject {
     public func clearPeripherals() {
         peripherals.removeAll()
     }
+    
+//    public func getState() -> String? {
+////        if let manager = self.manager, let state = UCBManagerState(state: manager.state) {
+////            return state.rawValue
+////        }
+//        return UCBManagerState(state: manager?.state ?? CBManagerState.unknown)?.rawValue
+//    }
 }
 
 extension UnityCoreBluetooth: CBCentralManagerDelegate {
@@ -192,17 +199,13 @@ extension UnityCoreBluetooth: CBCentralManagerDelegate {
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        for s in peripheral.services ?? [] {
-            self.onDiscoverServicelHandler?(s)
-        }
+            self.onDiscoverServicelHandler?(peripheral.services ?? [])
     }
 }
 
 extension UnityCoreBluetooth: CBPeripheralDelegate {
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        for c in service.characteristics ?? [] {
-            self.onDiscoverCharacteristiclHandler?(c)
-        }
+        self.onDiscoverCharacteristiclHandler?(service.characteristics ?? [])
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {

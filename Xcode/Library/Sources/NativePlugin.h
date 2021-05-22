@@ -21,14 +21,16 @@
 typedef void (*OnUpdateStateHandler) (const char* state);
 typedef void (*OnDiscoverPeripheralHandler) (CBPeripheral* peripheral);
 typedef void (*OnConnectPeripheralHandler) (CBPeripheral* peripheral);
-typedef void (*OnDiscoverServiceHandler) (CBService* service);
-typedef void (*OnDiscoverCharacteristicHandler) (CBCharacteristic* characteristic);
+//typedef void (*OnDiscoverServiceHandler) (CBService* service);
+typedef void (*OnDiscoverServiceHandler) (void* serviceArrayPtr, long servicesSize);
+//typedef void (*OnDiscoverCharacteristicHandler) (CBCharacteristic* characteristic);
+typedef void (*OnDiscoverCharacteristicHandler) (void* characteristicArrayPtr, long characteristicsSize);
 typedef void (*OnUpdateValueHandler) (CBCharacteristic* characteristic, unsigned char* data, long length);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    int add_one(int num);
+//    int add_one(int num);
 
 void unityCoreBluetooth_onUpdateState(UnityCoreBluetooth* unityCoreBluetooth, OnUpdateStateHandler handler);
 void unityCoreBluetooth_onDiscoverPeripheral(UnityCoreBluetooth* unityCoreBluetooth, OnDiscoverPeripheralHandler handler);
@@ -48,14 +50,16 @@ void unityCoreBluetooth_clearPeripherals(UnityCoreBluetooth* unityCoreBluetooth)
 
 const char* cbPeripheral_name(CBPeripheral* peripheral);
 void cbPeripheral_discoverServices(CBPeripheral* peripheral);
+void cbPeripheral_services(CBPeripheral* peripheral,  void *serviceArrayPtr, long* servicesSize);
 
 const char* cbService_uuid(CBService* service);
 void cbService_discoverCharacteristic(CBService* service);
+void cbService_characteristics(CBService* service, void* characteristicArrayPtr, long* characteristicsSize);
 
 const char* cbCharacteristic_uuid(CBCharacteristic* characteristic);
 const char* cbCharacteristic_propertyString(CBCharacteristic* characteristic);
 void cbCharacteristic_setNotifyValue(CBCharacteristic* characteristic, bool enable);
-void cbCharacteristic_writeValue(CBCharacteristic* characteristic, NSDate* data)
+void cbCharacteristic_writeValue(CBCharacteristic* characteristic, int type, unsigned char* chardata, long length);
 
 #ifdef __cplusplus
 }
