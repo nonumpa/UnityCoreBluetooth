@@ -42,6 +42,15 @@ void unityCoreBluetooth_onConnectPeripheral(UnityCoreBluetooth* unityCoreBluetoo
     }
 }
 
+void unityCoreBluetooth_onDisconnectPeripheral(UnityCoreBluetooth* unityCoreBluetooth, OnDisconnectPeripheralHandler handler) {
+    @autoreleasepool {
+        if (unityCoreBluetooth == nil) return;
+        [unityCoreBluetooth onDisconnectPeripheralWithHandler: ^(CBPeripheral* peripheral) {
+            handler(peripheral);
+        }];
+    }
+}
+
 void unityCoreBluetooth_onDiscoverService(UnityCoreBluetooth* unityCoreBluetooth, OnDiscoverServiceHandler handler) {
     @autoreleasepool {
         if (unityCoreBluetooth == nil) return;
@@ -53,10 +62,10 @@ void unityCoreBluetooth_onDiscoverService(UnityCoreBluetooth* unityCoreBluetooth
                 result[i++] = item;
             }
             handler(&result, [services count]);
-//            NSLog(@"NSArray services addr: %p", services);
-//            NSLog(@"result addr: %p", &result);
-//            NSLog(@"First service addr: %p", [services objectAtIndex:0]);
-//            NSLog(@"First result addr: %p", &result[0]);
+            NSLog(@"NSArray services addr: %p", services);
+            NSLog(@"result addr: %p", &result);
+            NSLog(@"First service addr: %p", [services objectAtIndex:0]);
+            NSLog(@"First result addr: %p", result[0]);
         }];
     }
 }
@@ -125,9 +134,48 @@ void unityCoreBluetooth_connect(UnityCoreBluetooth* unityCoreBluetooth, CBPeriph
     }
 }
 
+void unityCoreBluetooth_disconnect(UnityCoreBluetooth* unityCoreBluetooth, CBPeripheral* peripheral) {
+    @autoreleasepool {
+        if (unityCoreBluetooth == nil) return;
+        [unityCoreBluetooth disconnectWithPeripheral: peripheral];
+    }
+}
+
 void unityCoreBluetooth_clearPeripherals(UnityCoreBluetooth* unityCoreBluetooth) {
     if (unityCoreBluetooth == nil) return;
     [unityCoreBluetooth clearPeripherals];
+}
+
+//public func retrieveConnectedPeripherals(seriveces: [CBUUID])
+void* unityCoreBluetooth_getConnectedPeripherals(UnityCoreBluetooth* unityCoreBluetooth, const char* uuidString, long* peripheralsSize) {
+    @autoreleasepool {
+        if (unityCoreBluetooth == nil) {
+            *peripheralsSize = 0;
+            return 0;
+        }
+        NSLog(@"0 getConnectedPeripheral");
+        // string to CBUUID array
+        CBUUID *uuid = [CBUUID UUIDWithString:[NSString stringWithUTF8String: uuidString]];
+        NSArray *array = [NSArray arrayWithObjects: uuid,nil];
+        NSArray<CBPeripheral *> *ps = [unityCoreBluetooth retrieveConnectedPeripheralsWithSeriveces: array];
+        NSLog(@"1 getConnectedPeripheral");
+        if (ps == nil || ps.count == 0) {
+            *peripheralsSize = 0;
+            return 0;
+        }
+        NSLog(@"2 getConnectedPeripheral");
+        *peripheralsSize = [ps count];
+        CBPeripheral*__weak* result = (CBPeripheral*__weak*) malloc(sizeof(CBPeripheral*) *  [ps count]);
+        int i = 0;
+        for (id item in ps) {
+            result[i++] = item;
+        }
+        
+        NSLog(@"result addr: %p", &result);
+        NSLog(@"First peripheral addr: %p", [ps objectAtIndex:0]);
+        NSLog(@"First result addr: %p", result[0]);
+        return result;
+    }
 }
 
 const char* cbPeripheral_name(CBPeripheral* peripheral) {
@@ -143,19 +191,24 @@ void cbPeripheral_discoverServices(CBPeripheral* peripheral) {
     [peripheral discoverServices: nil];
 }
 
-void cbPeripheral_services(CBPeripheral* peripheral,  void *serviceArrayPtr, long* servicesSize) {
-    NSArray<CBService *> *ss = peripheral.services;
-    if (ss == nil) return;
-    
-    id result[ [ss count] ];
-    int i = 0;
-    for (id item in ss)
-    {
-        result[i++] = item;
+void* cbPeripheral_services(CBPeripheral* peripheral, long* servicesSize) {
+    @autoreleasepool {
+        NSArray<CBService *> *ss = peripheral.services;
+        if (ss == nil) return 0;
+
+        *servicesSize = [ss count];
+        CBService*__weak* result = (CBService*__weak*) malloc(sizeof(CBService*) *  [ss count]);
+        int i = 0;
+        for (id item in ss)
+        {
+            result[i++] = item;
+        }
+        
+        NSLog(@"2 result addr: %p", &result);
+        NSLog(@"2 First peripheral addr: %p", [ss objectAtIndex:0]);
+        NSLog(@"2 First result addr: %p", result[0]);
+        return result;
     }
-    
-    serviceArrayPtr = &result;
-    *servicesSize = [ss count];
 }
 
 const char* cbService_uuid(CBService* service) {

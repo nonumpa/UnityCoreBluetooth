@@ -117,6 +117,13 @@ public class UnityCoreBluetooth: NSObject {
         }
     }
     
+    private var onDisconnectPeripheralHandler: ((_ peripheral: CBPeripheral) -> Void)? = nil
+    public func onDisconnectPeripheral(handler: @escaping (_ peripheral: CBPeripheral) -> Void) {
+        DispatchQueue.main.async { [weak self] in
+            self?.onDisconnectPeripheralHandler = handler
+        }
+    }
+    
     private var onDiscoverServicelHandler: ((_ service: [CBService]) -> Void)? = nil
     public func onDiscoverService(handler: @escaping (_ services: [CBService]) -> Void) {
         DispatchQueue.main.async { [weak self] in
@@ -149,6 +156,15 @@ public class UnityCoreBluetooth: NSObject {
         manager = CBCentralManager(delegate: self, queue: nil)
     }
     
+    public func retrieveConnectedPeripherals(seriveces: [CBUUID]) -> [CBPeripheral]{
+        if let manager = self.manager {
+            return manager.retrieveConnectedPeripherals(withServices: seriveces)
+        }
+        else {
+            return [];
+        }
+    }
+    
     public func startScan() {
         if let manager = self.manager, manager.isScanning == false {
             manager.scanForPeripherals(withServices: nil, options: nil)
@@ -162,6 +178,12 @@ public class UnityCoreBluetooth: NSObject {
     public func connect(peripheral: CBPeripheral) {
         if let p = peripherals[peripheral.identifier.uuidString] {
             manager?.connect(p, options: nil)
+        }
+    }
+    
+    public func disconnect(peripheral: CBPeripheral) {
+        if let p = peripherals[peripheral.identifier.uuidString] {
+            manager?.cancelPeripheralConnection(p)
         }
     }
     
@@ -192,6 +214,11 @@ extension UnityCoreBluetooth: CBCentralManagerDelegate {
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         peripheral.delegate = self
         self.onConnectPeripheralHandler?(peripheral)
+    }
+    
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        peripheral.delegate = self
+        self.onDisconnectPeripheralHandler?(peripheral)
     }
     
     public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {

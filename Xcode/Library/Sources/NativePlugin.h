@@ -21,6 +21,7 @@
 typedef void (*OnUpdateStateHandler) (const char* state);
 typedef void (*OnDiscoverPeripheralHandler) (CBPeripheral* peripheral);
 typedef void (*OnConnectPeripheralHandler) (CBPeripheral* peripheral);
+typedef void (*OnDisconnectPeripheralHandler) (CBPeripheral* peripheral);
 //typedef void (*OnDiscoverServiceHandler) (CBService* service);
 typedef void (*OnDiscoverServiceHandler) (void* serviceArrayPtr, long servicesSize);
 //typedef void (*OnDiscoverCharacteristicHandler) (CBCharacteristic* characteristic);
@@ -35,6 +36,7 @@ extern "C" {
 void unityCoreBluetooth_onUpdateState(UnityCoreBluetooth* unityCoreBluetooth, OnUpdateStateHandler handler);
 void unityCoreBluetooth_onDiscoverPeripheral(UnityCoreBluetooth* unityCoreBluetooth, OnDiscoverPeripheralHandler handler);
 void unityCoreBluetooth_onConnectPeripheral(UnityCoreBluetooth* unityCoreBluetooth, OnConnectPeripheralHandler handler);
+void unityCoreBluetooth_onDisconnectPeripheral(UnityCoreBluetooth* unityCoreBluetooth, OnDisconnectPeripheralHandler handler);
 void unityCoreBluetooth_onDiscoverService(UnityCoreBluetooth* unityCoreBluetooth, OnDiscoverServiceHandler handler);
 void unityCoreBluetooth_onDiscoverCharacteristic(UnityCoreBluetooth* unityCoreBluetooth, OnDiscoverCharacteristicHandler handler);
 void unityCoreBluetooth_onUpdateValue(UnityCoreBluetooth* unityCoreBluetooth, OnUpdateValueHandler handler);
@@ -46,11 +48,13 @@ void unityCoreBluetooth_startCoreBluetooth(UnityCoreBluetooth* unityCoreBluetoot
 void unityCoreBluetooth_startScan(UnityCoreBluetooth* unityCoreBluetooth);
 void unityCoreBluetooth_stopScan(UnityCoreBluetooth* unityCoreBluetooth);
 void unityCoreBluetooth_connect(UnityCoreBluetooth* unityCoreBluetooth, CBPeripheral* peripheral);
+void unityCoreBluetooth_disconnect(UnityCoreBluetooth* unityCoreBluetooth, CBPeripheral* peripheral);
 void unityCoreBluetooth_clearPeripherals(UnityCoreBluetooth* unityCoreBluetooth);
+void* unityCoreBluetooth_getConnectedPeripherals(UnityCoreBluetooth* unityCoreBluetooth, const char* string, long* peripheralsSize);
 
 const char* cbPeripheral_name(CBPeripheral* peripheral);
 void cbPeripheral_discoverServices(CBPeripheral* peripheral);
-void cbPeripheral_services(CBPeripheral* peripheral,  void *serviceArrayPtr, long* servicesSize);
+void* cbPeripheral_services(CBPeripheral* peripheral, long* servicesSize);
 
 const char* cbService_uuid(CBService* service);
 void cbService_discoverCharacteristic(CBService* service);
