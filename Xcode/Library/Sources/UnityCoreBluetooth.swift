@@ -165,9 +165,9 @@ public class UnityCoreBluetooth: NSObject {
         }
     }
     
-    public func startScan() {
+    public func startScan(seriveces: [CBUUID]? = nil) {
         if let manager = self.manager, manager.isScanning == false {
-            manager.scanForPeripherals(withServices: nil, options: nil)
+            manager.scanForPeripherals(withServices: seriveces, options: nil)
         }
     }
     

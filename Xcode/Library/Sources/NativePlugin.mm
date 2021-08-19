@@ -115,9 +115,12 @@ void unityCoreBluetooth_startCoreBluetooth(UnityCoreBluetooth* unityCoreBluetoot
     [unityCoreBluetooth startCoreBluetooth];
 }
 
-void unityCoreBluetooth_startScan(UnityCoreBluetooth* unityCoreBluetooth) {
+void unityCoreBluetooth_startScan(UnityCoreBluetooth* unityCoreBluetooth, const char* uuidString) {
     if (unityCoreBluetooth == nil) return;
-    [unityCoreBluetooth startScan];
+    // string to CBUUID array
+    CBUUID *uuid = [CBUUID UUIDWithString:[NSString stringWithUTF8String: uuidString]];
+    NSArray *services = [NSArray arrayWithObjects: uuid, nil];
+    [unityCoreBluetooth startScanWithSeriveces: services];
 }
 
 void unityCoreBluetooth_stopScan(UnityCoreBluetooth* unityCoreBluetooth) {
@@ -153,17 +156,17 @@ void* unityCoreBluetooth_getConnectedPeripherals(UnityCoreBluetooth* unityCoreBl
             *peripheralsSize = 0;
             return 0;
         }
-        NSLog(@"0 getConnectedPeripheral");
+
         // string to CBUUID array
         CBUUID *uuid = [CBUUID UUIDWithString:[NSString stringWithUTF8String: uuidString]];
         NSArray *array = [NSArray arrayWithObjects: uuid,nil];
         NSArray<CBPeripheral *> *ps = [unityCoreBluetooth retrieveConnectedPeripheralsWithSeriveces: array];
-        NSLog(@"1 getConnectedPeripheral");
+
         if (ps == nil || ps.count == 0) {
             *peripheralsSize = 0;
             return 0;
         }
-        NSLog(@"2 getConnectedPeripheral");
+
         *peripheralsSize = [ps count];
         CBPeripheral*__weak* result = (CBPeripheral*__weak*) malloc(sizeof(CBPeripheral*) *  [ps count]);
         int i = 0;
@@ -171,9 +174,9 @@ void* unityCoreBluetooth_getConnectedPeripherals(UnityCoreBluetooth* unityCoreBl
             result[i++] = item;
         }
         
-        NSLog(@"result addr: %p", &result);
-        NSLog(@"First peripheral addr: %p", [ps objectAtIndex:0]);
-        NSLog(@"First result addr: %p", result[0]);
+//        NSLog(@"result addr: %p", &result);
+//        NSLog(@"First peripheral addr: %p", [ps objectAtIndex:0]);
+//        NSLog(@"First result addr: %p", result[0]);
         return result;
     }
 }
@@ -204,9 +207,9 @@ void* cbPeripheral_services(CBPeripheral* peripheral, long* servicesSize) {
             result[i++] = item;
         }
         
-        NSLog(@"2 result addr: %p", &result);
-        NSLog(@"2 First peripheral addr: %p", [ss objectAtIndex:0]);
-        NSLog(@"2 First result addr: %p", result[0]);
+//        NSLog(@"2 result addr: %p", &result);
+//        NSLog(@"2 First peripheral addr: %p", [ss objectAtIndex:0]);
+//        NSLog(@"2 First result addr: %p", result[0]);
         return result;
     }
 }
@@ -227,8 +230,8 @@ void cbService_discoverCharacteristic(CBService* service) {
 
 void cbService_characteristics(CBService* service, void* characteristicArrayPtr, long* characteristicsSize) {
     NSArray<CBCharacteristic*>* cs = service.characteristics;
-    NSLog(@"cbService_characteristics service addr: %p", service);
-    NSLog(@"cbService_characteristics characteristics addr: %p", cs);
+//    NSLog(@"cbService_characteristics service addr: %p", service);
+//    NSLog(@"cbService_characteristics characteristics addr: %p", cs);
     if (cs == nil) return;
     NSLog(@"cbService_characteristics count: %ld", [cs count]);
     id result[ [cs count] ];

@@ -45,7 +45,7 @@ UnityCoreBluetooth* unityCoreBluetooth_init();
 void unityCoreBluetooth_release(UnityCoreBluetooth* unityCoreBluetooth);
 
 void unityCoreBluetooth_startCoreBluetooth(UnityCoreBluetooth* unityCoreBluetooth);
-void unityCoreBluetooth_startScan(UnityCoreBluetooth* unityCoreBluetooth);
+void unityCoreBluetooth_startScan(UnityCoreBluetooth* unityCoreBluetooth, const char* uuidString);
 void unityCoreBluetooth_stopScan(UnityCoreBluetooth* unityCoreBluetooth);
 void unityCoreBluetooth_connect(UnityCoreBluetooth* unityCoreBluetooth, CBPeripheral* peripheral);
 void unityCoreBluetooth_disconnect(UnityCoreBluetooth* unityCoreBluetooth, CBPeripheral* peripheral);
